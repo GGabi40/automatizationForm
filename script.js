@@ -520,24 +520,36 @@ function removeFlow(flowId) {
 
 // Actualizar selectores de flujos conectados
 function updateFlowSelectors() {
-  const flows = document.querySelectorAll(".flow-card")
-  flows.forEach((flow) => {
-    const selector = flow.querySelector('[data-field="connectedFlow"]')
-    const currentFlowId = flow.dataset.flowId
-    const currentOptions = selector.innerHTML
+  const flows = document.querySelectorAll(".flow-card");
+  if (flows.length === 0) return;
 
-    selector.innerHTML = '<option value="">No</option>'
+  flows.forEach((flow) => {
+    const selector = flow.querySelector('[data-field="connectedFlow"]');
+    if (!selector) return;
+
+    const currentFlowId = flow.dataset.flowId;
+    selector.innerHTML = '<option value="">No</option>';
 
     flows.forEach((otherFlow) => {
-      if (otherFlow.dataset.flowId !== currentFlowId) {
-        const name =
-          otherFlow.querySelector('[data-field="name"]').value ||
-          `Flujo #${otherFlow.querySelector(".flow-number").textContent}`
-        selector.innerHTML += `<option value="${otherFlow.dataset.flowId}">${name}</option>`
+      if (!otherFlow || otherFlow.dataset.flowId === currentFlowId) return;
+
+      const nameField = otherFlow.querySelector('[data-field="name"]');
+      const flowNumber = otherFlow.querySelector(".flow-number");
+
+      const name = nameField?.value?.trim() || 
+                   (flowNumber ? `Flujo #${flowNumber.textContent}` : "Flujo sin nombre");
+
+      // Solo agregar si name no está vacío
+      if (name && selector) {
+        const opt = document.createElement("option");
+        opt.value = otherFlow.dataset.flowId;
+        opt.textContent = name;
+        selector.appendChild(opt);
       }
-    })
-  })
+    });
+  });
 }
+
 
 // Agregar relación
 function addRelation() {
@@ -606,94 +618,91 @@ function removeRelation(relationId) {
 
 // Actualizar selectores de flujos en relaciones
 function updateRelationFlowSelectors() {
-  const flows = document.querySelectorAll(".flow-card")
-  const relations = document.querySelectorAll(".relation-card")
+  const flows = document.querySelectorAll(".flow-card");
+  const relations = document.querySelectorAll(".relation-card");
+  if (relations.length === 0 || flows.length === 0) return;
 
   relations.forEach((relation) => {
-    const sourceSelector = relation.querySelector('[data-field="sourceFlow"]')
-    const targetSelector = relation.querySelector('[data-field="targetFlow"]')
+    const sourceSelector = relation.querySelector('[data-field="sourceFlow"]');
+    const targetSelector = relation.querySelector('[data-field="targetFlow"]');
+    if (!sourceSelector || !targetSelector) return;
 
-    sourceSelector.innerHTML = '<option value="">Seleccionar flujo...</option>'
-    targetSelector.innerHTML = '<option value="">Seleccionar flujo...</option>'
+    sourceSelector.innerHTML = '<option value="">Seleccionar flujo...</option>';
+    targetSelector.innerHTML = '<option value="">Seleccionar flujo...</option>';
 
     flows.forEach((flow) => {
-      const name =
-        flow.querySelector('[data-field="name"]').value || `Flujo #${flow.querySelector(".flow-number").textContent}`
-      const flowId = flow.dataset.flowId
-      sourceSelector.innerHTML += `<option value="${flowId}">${name}</option>`
-      targetSelector.innerHTML += `<option value="${flowId}">${name}</option>`
-    })
-  })
+      if (!flow) return;
+
+      const nameField = flow.querySelector('[data-field="name"]');
+      const flowNumber = flow.querySelector(".flow-number");
+      const name = nameField?.value?.trim() || 
+                   (flowNumber ? `Flujo #${flowNumber.textContent}` : "Flujo sin nombre");
+
+      const flowId = flow.dataset.flowId || "";
+      if (!flowId) return;
+
+      const optionHTML = `<option value="${flowId}">${name}</option>`;
+      sourceSelector.insertAdjacentHTML("beforeend", optionHTML);
+      targetSelector.insertAdjacentHTML("beforeend", optionHTML);
+    });
+  });
 }
+
 
 // Recopilar datos del formulario
 function collectFormData() {
-  const data = {
-    automationType: appState.automationType,
-    objective: document.getElementById("objective").value,
-    priority: document.getElementById("priority").value,
-    responsible: document.getElementById("responsible").value,
-    implementationDate: document.getElementById("implementationDate").value,
-    specificData: {},
-    flows: [],
-    relations: [],
-  }
+  // ✅ Buscar los elementos de forma segura
+  const userInput = document.getElementById("userName");
+  const companyInput = document.getElementById("companyName");
+  const typeInput = document.querySelector('input[name="automationType"]:checked');
+  
+  // ✅ Leer valores con fallback
+  const userName = userInput ? userInput.value.trim() : "";
+  const companyName = companyInput ? companyInput.value.trim() : "";
+  const automationType = typeInput ? typeInput.value : "sin definir";
 
-  // Datos específicos según tipo
-  switch (appState.automationType) {
-    case "existing":
-      data.specificData = {
-        websiteUrl: document.getElementById("websiteUrl")?.value,
-        pages: document.getElementById("pages")?.value,
-      }
-      break
-    case "development":
-      data.specificData = {
-        projectName: document.getElementById("projectName")?.value,
-        projectDescription: document.getElementById("projectDescription")?.value,
-      }
-      break
-    case "custom":
-      data.specificData = {
-        customDescription: document.getElementById("customDescription")?.value,
-        tools: document.getElementById("tools")?.value,
-        dataSource: document.getElementById("dataSource")?.value,
-        frequency: document.getElementById("frequency")?.value,
-        expectedResult: document.getElementById("expectedResult")?.value,
-      }
-      break
-  }
+  // ✅ Evitar que el resto falle
+  const flows = collectFlowsSafely();
+  const relations = collectRelationsSafely();
 
-  // Recopilar flujos
-  document.querySelectorAll(".flow-card").forEach((flowCard) => {
-    const flow = {
-      id: flowCard.dataset.flowId,
-      name: flowCard.querySelector('[data-field="name"]').value,
-      page: flowCard.querySelector('[data-field="page"]')?.value, // Nullable for custom type
-      description: flowCard.querySelector('[data-field="description"]').value,
-      trigger: flowCard.querySelector('[data-field="trigger"]').value,
-      action: flowCard.querySelector('[data-field="action"]').value,
-      conditions: flowCard.querySelector('[data-field="conditions"]').value,
-      dependencies: flowCard.querySelector('[data-field="dependencies"]').value,
-      connectedFlow: flowCard.querySelector('[data-field="connectedFlow"]').value,
-    }
-    data.flows.push(flow)
-  })
-
-  // Recopilar relaciones
-  document.querySelectorAll(".relation-card").forEach((relationCard) => {
-    const relation = {
-      id: relationCard.dataset.relationId,
-      sourceFlow: relationCard.querySelector('[data-field="sourceFlow"]').value,
-      relationType: relationCard.querySelector('[data-field="relationType"]').value,
-      targetFlow: relationCard.querySelector('[data-field="targetFlow"]').value,
-      linkCondition: relationCard.querySelector('[data-field="linkCondition"]').value,
-    }
-    data.relations.push(relation)
-  })
-
-  return data
+  return {
+    userName,
+    companyName,
+    automationType,
+    flows,
+    relations
+  };
 }
+
+function collectFlowsSafely() {
+  const flows = [];
+  document.querySelectorAll(".flow-card").forEach(flow => {
+    const nameInput = flow.querySelector('[data-field="name"]');
+    const actionInput = flow.querySelector('[data-field="action"]');
+    const triggerInput = flow.querySelector('[data-field="trigger"]');
+
+    flows.push({
+      name: nameInput ? nameInput.value : "",
+      trigger: triggerInput ? triggerInput.value : "",
+      action: actionInput ? actionInput.value : ""
+    });
+  });
+  return flows;
+}
+
+function collectRelationsSafely() {
+  const relations = [];
+  document.querySelectorAll(".relation-card").forEach(rel => {
+    const condition = rel.querySelector('[data-field="condition"]');
+    const type = rel.querySelector('[data-field="type"]');
+    relations.push({
+      type: type ? type.value : "",
+      condition: condition ? condition.value : ""
+    });
+  });
+  return relations;
+}
+
 
 // Mostrar vista previa
 function showPreview() {
