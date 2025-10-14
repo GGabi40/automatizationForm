@@ -1257,38 +1257,45 @@ function resetCanvasView() {
 }
 
 function handleFormSubmit(e) {
-  e.preventDefault()
+  e.preventDefault();
 
   if (!validateForm()) {
-    alert("Por favor completa todos los campos requeridos.")
-    return
+    alert("Por favor completa todos los campos requeridos.");
+    return;
   }
 
-  const data = collectFormData()
+  const data = collectFormData();
 
-  // Save to localStorage for dashboard
-  const automations = JSON.parse(localStorage.getItem("automations") || "[]")
+  // ✅ Aseguramos que specificData exista aunque esté vacío
+  const specificData = data.specificData || {};
+
+  // Guardar en localStorage para el dashboard
+  const automations = JSON.parse(localStorage.getItem("automations") || "[]");
+
   const newAutomation = {
     id: automations.length + 1,
-    empresa: data.specificData.projectName || data.specificData.websiteUrl || "Cliente",
+    empresa: specificData.projectName || specificData.websiteUrl || data.companyName || "Cliente",
     tipo: getAutomationTypeLabel(data.automationType),
     fecha: new Date().toISOString().split("T")[0],
     estado: "pending",
     data: data,
-  }
-  automations.push(newAutomation)
-  localStorage.setItem("automations", JSON.stringify(automations))
+  };
 
-  console.log("Datos del formulario:", data)
+  automations.push(newAutomation);
+  localStorage.setItem("automations", JSON.stringify(automations));
 
-  // Show success message with link to dashboard
+  console.log("✅ Datos del formulario guardados:", data);
+
+  // Mostrar confirmación con opción de ir al dashboard
   const goToDashboard = confirm(
-    "✅ Automatización guardada exitosamente.\n\n¿Quieres ir al dashboard para ver todas las automatizaciones?",
-  )
+    "✅ Automatización guardada exitosamente.\n\n¿Quieres ir al dashboard para ver todas las automatizaciones?"
+  );
+
   if (goToDashboard) {
-    window.location.href = "dashboard.html"
+    window.location.href = "dashboard.html";
   }
 }
+
 
 // Funciones de modal
 function openModal(modal) {
