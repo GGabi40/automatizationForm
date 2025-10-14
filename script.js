@@ -120,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
   radios.forEach(r => r.checked = false);
 });
 
-
 // Elementos del DOM
 const form = document.getElementById("automationForm")
 const dynamicContent = document.getElementById("dynamicContent")
@@ -513,6 +512,7 @@ function collectFormData() {
     automationType: appState.automationType,
     objective: document.getElementById("objective").value,
     priority: document.getElementById("priority").value,
+    responsible: document.getElementById("responsible").value,
     implementationDate: document.getElementById("implementationDate").value,
     specificData: {},
     flows: [],
@@ -594,7 +594,7 @@ function validateForm() {
   let isValid = true
 
   // Validate main form fields
-  const requiredFields = ["objective", "priority", "implementationDate"]
+  const requiredFields = ["objective", "priority", "responsible", "implementationDate"]
   requiredFields.forEach((fieldId) => {
     const field = document.getElementById(fieldId)
     if (field && !field.value.trim()) {
@@ -660,6 +660,10 @@ function renderVisualPreview(data) {
             <div class="preview-item">
                 <span class="preview-label">Prioridad:</span>
                 <span class="preview-value">${getPriorityLabel(data.priority)}</span>
+            </div>
+            <div class="preview-item">
+                <span class="preview-label">Responsable:</span>
+                <span class="preview-value">${data.responsible}</span>
             </div>
             <div class="preview-item">
                 <span class="preview-label">Fecha de implementación:</span>
@@ -781,7 +785,7 @@ function exportCsv() {
 
   // Create CSV content
   let csv = "Tipo de Automatización,Objetivo,Prioridad,Responsable,Fecha de Implementación\n"
-  csv += `"${getAutomationTypeLabel(data.automationType)}","${data.objective}","${getPriorityLabel(data.priority)}","${data.implementationDate}"\n\n`
+  csv += `"${getAutomationTypeLabel(data.automationType)}","${data.objective}","${getPriorityLabel(data.priority)}","${data.responsible}","${data.implementationDate}"\n\n`
 
   // Add flows
   if (data.flows.length > 0) {
@@ -1104,11 +1108,29 @@ function handleFormSubmit(e) {
   }
 
   const data = collectFormData()
+
+  // Save to localStorage for dashboard
+  const automations = JSON.parse(localStorage.getItem("automations") || "[]")
+  const newAutomation = {
+    id: automations.length + 1,
+    empresa: data.specificData.projectName || data.specificData.websiteUrl || "Cliente",
+    tipo: getAutomationTypeLabel(data.automationType),
+    fecha: new Date().toISOString().split("T")[0],
+    estado: "pending",
+    data: data,
+  }
+  automations.push(newAutomation)
+  localStorage.setItem("automations", JSON.stringify(automations))
+
   console.log("Datos del formulario:", data)
 
-  // Mostrar el JSON final
-  alert("JSON generado correctamente. Revisa la consola para ver los datos.")
-  console.log(JSON.stringify(data, null, 2))
+  // Show success message with link to dashboard
+  const goToDashboard = confirm(
+    "✅ Automatización guardada exitosamente.\n\n¿Quieres ir al dashboard para ver todas las automatizaciones?",
+  )
+  if (goToDashboard) {
+    window.location.href = "dashboard.html"
+  }
 }
 
 // Funciones de modal
@@ -1585,4 +1607,3 @@ async function sendToDatabase() {
         `
   }
 }
-
