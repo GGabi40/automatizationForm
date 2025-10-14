@@ -12,113 +12,228 @@ const appState = {
 
 const templates = [
   {
-    id: "contact-form",
-    name: "Formulario de contacto → Enviar correo → Etiquetar Lead",
-    description: "Captura leads desde un formulario y los etiqueta automáticamente",
+    id: "post-purchase",
+    name: "Automatización post-compra",
+    description: "Secuencia completa de seguimiento después de una compra",
     flows: [
       {
-        name: "Captura de formulario de contacto",
-        page: "/contacto",
-        description: "Usuario completa formulario con nombre, email y mensaje",
-        trigger: "form-submit",
-        action: "create-contact",
-        conditions: "Email válido",
-        dependencies: "CRM (ActiveCampaign, HubSpot)",
-      },
-      {
-        name: "Envío de correo de confirmación",
-        page: "/contacto",
-        description: "Enviar email automático confirmando recepción del mensaje",
+        name: "Flujo 1: Confirmación de compra",
+        objective: "Notificar al cliente de su compra",
+        page: "/checkout",
+        description: "Enviar correo de confirmación con detalles de la compra y número de orden",
         trigger: "form-submit",
         action: "send-email",
-        conditions: "",
-        dependencies: "Servicio de email (SendGrid, Mailgun)",
-      },
-      {
-        name: "Etiquetado de lead",
-        page: "/contacto",
-        description: "Añadir tag 'Lead-Contacto' al contacto en el CRM",
-        trigger: "form-submit",
-        action: "add-tag",
-        conditions: "",
-        dependencies: "CRM",
-      },
-    ],
-  },
-  {
-    id: "purchase-flow",
-    name: "Compra → Enviar confirmación → Notificar equipo",
-    description: "Automatización completa del proceso post-compra",
-    flows: [
-      {
-        name: "Registro de compra",
-        page: "/checkout",
-        description: "Guardar datos de la compra en base de datos",
-        trigger: "form-submit",
-        action: "update-database",
         conditions: "Pago exitoso",
-        dependencies: "Base de datos, Pasarela de pago",
+        dependencies: "Servicio de email (SendGrid, Mailgun)",
+        activatedBy: "Al completar el pago",
       },
       {
-        name: "Confirmación al cliente",
+        name: "Flujo 2: Notificación interna",
+        objective: "Avisar al equipo de ventas",
         page: "/checkout",
-        description: "Enviar email con detalles de la compra y número de orden",
-        trigger: "form-submit",
-        action: "send-email",
-        conditions: "",
-        dependencies: "Servicio de email",
-      },
-      {
-        name: "Notificación al equipo",
-        page: "/checkout",
-        description: "Alertar al equipo de ventas sobre nueva compra",
+        description: "Alertar al equipo de ventas sobre nueva compra con datos del cliente",
         trigger: "form-submit",
         action: "send-notification",
         conditions: "",
         dependencies: "Slack, Email interno",
+        activatedBy: "Después del Flujo 1",
+      },
+      {
+        name: "Flujo 3: Registro en CRM",
+        objective: "Actualizar base de datos de clientes",
+        page: "/checkout",
+        description: "Crear o actualizar contacto en CRM con tag 'Cliente' y datos de compra",
+        trigger: "form-submit",
+        action: "create-contact",
+        conditions: "",
+        dependencies: "CRM (ActiveCampaign, HubSpot)",
+        activatedBy: "Al mismo tiempo que Flujo 1",
       },
     ],
   },
   {
-    id: "subscription-flow",
-    name: "Suscripción → Enviar bienvenida → Añadir a lista",
-    description: "Onboarding automático para nuevos suscriptores",
+    id: "masterclass-sequence",
+    name: "Secuencia de Masterclass",
+    description: "Automatización completa para eventos educativos online",
     flows: [
       {
-        name: "Registro de suscriptor",
-        page: "/suscribirse",
-        description: "Capturar email del nuevo suscriptor",
+        name: "Flujo 1: Bienvenida",
+        objective: "Entregar enlace de acceso al evento",
+        page: "/registro-masterclass",
+        description: "Enviar correo de bienvenida con enlace de Zoom/Meet y materiales preparatorios",
+        trigger: "form-submit",
+        action: "send-email",
+        conditions: "Email válido",
+        dependencies: "Servicio de email, Zoom API",
+        activatedBy: "Al registrarse en el formulario",
+      },
+      {
+        name: "Flujo 2: Recordatorio",
+        objective: "Recordar asistencia al evento",
+        page: "/registro-masterclass",
+        description: "Enviar recordatorio 24 horas antes con enlace y agenda del evento",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Usuario registrado y no canceló",
+        dependencies: "Servicio de email, Calendario",
+        activatedBy: "Un día antes del evento",
+      },
+      {
+        name: "Flujo 3: Seguimiento",
+        objective: "Recopilar feedback y ofrecer recursos",
+        page: "/registro-masterclass",
+        description: "Enviar encuesta de satisfacción y materiales adicionales después del evento",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Evento finalizado",
+        dependencies: "Servicio de email, Google Forms",
+        activatedBy: "Después del evento (2-4 horas)",
+      },
+    ],
+  },
+  {
+    id: "lead-nurturing",
+    name: "Nutrición de Leads",
+    description: "Secuencia de emails para convertir leads en clientes",
+    flows: [
+      {
+        name: "Flujo 1: Captura inicial",
+        objective: "Registrar nuevo lead en el sistema",
+        page: "/lead-magnet",
+        description: "Capturar email y crear contacto en CRM con tag 'Lead-Nuevo'",
         trigger: "form-submit",
         action: "create-contact",
         conditions: "Email no existe en base de datos",
         dependencies: "CRM, Base de datos",
+        activatedBy: "Al descargar lead magnet",
       },
       {
-        name: "Email de bienvenida",
-        page: "/suscribirse",
-        description: "Enviar serie de emails de bienvenida (día 1, 3, 7)",
+        name: "Flujo 2: Email de bienvenida",
+        objective: "Entregar recurso prometido y presentar marca",
+        page: "/lead-magnet",
+        description: "Enviar email con link de descarga y presentación de la empresa",
         trigger: "form-submit",
         action: "send-email",
         conditions: "",
-        dependencies: "Servicio de email marketing",
+        dependencies: "Servicio de email",
+        activatedBy: "Inmediatamente después de Flujo 1",
       },
       {
-        name: "Añadir a lista de newsletter",
-        page: "/suscribirse",
-        description: "Agregar contacto a lista de distribución principal",
+        name: "Flujo 3: Contenido educativo (Día 3)",
+        objective: "Educar sobre el problema que resolvemos",
+        page: "/lead-magnet",
+        description: "Enviar caso de estudio o artículo relevante",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Lead no se dio de baja",
+        dependencies: "Servicio de email marketing",
+        activatedBy: "3 días después del registro",
+      },
+      {
+        name: "Flujo 4: Oferta comercial (Día 7)",
+        objective: "Presentar solución y llamado a la acción",
+        page: "/lead-magnet",
+        description: "Enviar email con oferta especial y link a página de ventas",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Lead no compró aún",
+        dependencies: "Servicio de email, CRM",
+        activatedBy: "7 días después del registro",
+      },
+    ],
+  },
+  {
+    id: "abandoned-cart",
+    name: "Recuperación de Carrito Abandonado",
+    description: "Secuencia para recuperar ventas perdidas",
+    flows: [
+      {
+        name: "Flujo 1: Detección de abandono",
+        objective: "Identificar carritos abandonados",
+        page: "/checkout",
+        description: "Registrar cuando usuario abandona checkout sin completar compra",
+        trigger: "page-load",
+        action: "update-database",
+        conditions: "Usuario salió sin comprar",
+        dependencies: "Base de datos, Tracking",
+        activatedBy: "Al salir de la página de checkout",
+      },
+      {
+        name: "Flujo 2: Primer recordatorio (1 hora)",
+        objective: "Recordar productos en carrito",
+        page: "/checkout",
+        description: "Enviar email recordando productos y ofreciendo ayuda",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Carrito no completado",
+        dependencies: "Servicio de email, Base de datos",
+        activatedBy: "1 hora después del abandono",
+      },
+      {
+        name: "Flujo 3: Incentivo (24 horas)",
+        objective: "Ofrecer descuento para cerrar venta",
+        page: "/checkout",
+        description: "Enviar cupón de descuento del 10% con urgencia (válido 48h)",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Carrito aún no completado",
+        dependencies: "Servicio de email, Sistema de cupones",
+        activatedBy: "24 horas después del abandono",
+      },
+    ],
+  },
+  {
+    id: "onboarding-saas",
+    name: "Onboarding de Usuario SaaS",
+    description: "Guiar nuevos usuarios en sus primeros pasos",
+    flows: [
+      {
+        name: "Flujo 1: Bienvenida y activación",
+        objective: "Dar bienvenida y guiar primer uso",
+        page: "/registro",
+        description: "Enviar email de bienvenida con guía de inicio rápido y video tutorial",
         trigger: "form-submit",
-        action: "add-tag",
-        conditions: "",
-        dependencies: "Mailchimp, ActiveCampaign",
+        action: "send-email",
+        conditions: "Cuenta creada exitosamente",
+        dependencies: "Servicio de email, CRM",
+        activatedBy: "Al crear cuenta",
+      },
+      {
+        name: "Flujo 2: Recordatorio de configuración",
+        objective: "Incentivar completar perfil",
+        page: "/dashboard",
+        description: "Recordar completar configuración si no lo hizo en 24h",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Perfil incompleto",
+        dependencies: "Servicio de email, Base de datos",
+        activatedBy: "24 horas después del registro",
+      },
+      {
+        name: "Flujo 3: Tips de uso (Día 3)",
+        objective: "Educar sobre funcionalidades clave",
+        page: "/dashboard",
+        description: "Enviar tips y mejores prácticas para aprovechar la plataforma",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Usuario activo",
+        dependencies: "Servicio de email",
+        activatedBy: "3 días después del registro",
+      },
+      {
+        name: "Flujo 4: Solicitud de feedback",
+        objective: "Recopilar opiniones para mejorar",
+        page: "/dashboard",
+        description: "Enviar encuesta de satisfacción y ofrecer soporte personalizado",
+        trigger: "time-based",
+        action: "send-email",
+        conditions: "Usuario completó al menos una acción",
+        dependencies: "Servicio de email, Herramienta de encuestas",
+        activatedBy: "7 días después del registro",
       },
     ],
   },
 ]
-
-document.addEventListener("DOMContentLoaded", () => {
-  const radios = document.querySelectorAll('input[name="automationType"]');
-  radios.forEach(r => r.checked = false);
-});
 
 // Elementos del DOM
 const form = document.getElementById("automationForm")
@@ -135,6 +250,11 @@ const wizardModal = document.getElementById("wizardModal")
 const dbModal = document.getElementById("dbModal")
 
 // Event Listeners
+document.addEventListener("DOMContentLoaded", () => {
+  const radios = document.querySelectorAll('input[name="automationType"]')
+  radios.forEach((r) => (r.checked = false))
+})
+
 document.addEventListener("DOMContentLoaded", init)
 
 function init() {
@@ -959,7 +1079,7 @@ function drawConnection(conn) {
   const startX = conn.source.x + Math.cos(angle) * conn.source.radius
   const startY = conn.source.y + Math.sin(angle) * conn.source.radius
   const endX = conn.target.x - Math.cos(angle) * conn.target.radius
-  const endY = conn.target.y - Math.sin(angle) * conn.target.radius
+  const endY = conn.target.y - Math.sin(angle) * conn.target.y
 
   ctx.beginPath()
   ctx.moveTo(startX, startY)
@@ -968,7 +1088,6 @@ function drawConnection(conn) {
   ctx.lineWidth = 3
   ctx.stroke()
 
-  // Flecha
   const arrowSize = 15
   ctx.beginPath()
   ctx.moveTo(endX, endY)
@@ -977,6 +1096,9 @@ function drawConnection(conn) {
   ctx.closePath()
   ctx.fillStyle = conn.color
   ctx.fill()
+  ctx.strokeStyle = conn.color
+  ctx.lineWidth = 2
+  ctx.stroke()
 }
 
 function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -1066,24 +1188,50 @@ function showNodeDetails(node) {
   detailsContent.innerHTML = `
         <div class="preview-item">
             <span class="preview-label">Nombre:</span>
-            <span class="preview-value">${node.data.name}</span>
+            <span class="preview-value">${node.data.name || "Sin nombre"}</span>
         </div>
+        ${
+          node.data.page
+            ? `
         <div class="preview-item">
             <span class="preview-label">Página:</span>
             <span class="preview-value">${node.data.page}</span>
         </div>
+        `
+            : ""
+        }
         <div class="preview-item">
             <span class="preview-label">Descripción:</span>
-            <span class="preview-value">${node.data.description}</span>
+            <span class="preview-value">${node.data.description || "Sin descripción"}</span>
         </div>
         <div class="preview-item">
-            <span class="preview-label">Trigger:</span>
-            <span class="preview-value">${node.data.trigger}</span>
+            <span class="preview-label">Evento inicial:</span>
+            <span class="preview-value">${node.data.trigger || "No especificado"}</span>
         </div>
         <div class="preview-item">
             <span class="preview-label">Acción:</span>
-            <span class="preview-value">${node.data.action}</span>
+            <span class="preview-value">${node.data.action || "No especificada"}</span>
         </div>
+        ${
+          node.data.conditions
+            ? `
+        <div class="preview-item">
+            <span class="preview-label">Condiciones:</span>
+            <span class="preview-value">${node.data.conditions}</span>
+        </div>
+        `
+            : ""
+        }
+        ${
+          node.data.dependencies
+            ? `
+        <div class="preview-item">
+            <span class="preview-label">Dependencias:</span>
+            <span class="preview-value">${node.data.dependencies}</span>
+        </div>
+        `
+            : ""
+        }
     `
 
   detailsPanel.style.display = "block"
@@ -1154,15 +1302,48 @@ function showTemplates() {
   templatesList.innerHTML = templates
     .map(
       (template) => `
-        <div class="flow-card" style="cursor: pointer;" onclick="applyTemplate('${template.id}')">
-            <div style="padding: 1.5rem;">
-                <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${template.name}</h4>
-                <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">${template.description}</p>
-                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-primary); font-size: 0.875rem;">
-                    <span>${template.flows.length} flujos incluidos</span>
-                    <span>→</span>
+        <div class="flow-card">
+            <details>
+                <summary style="cursor: pointer; padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${template.name}</h4>
+                            <p style="color: var(--color-text-secondary); margin-bottom: 0.75rem;">${template.description}</p>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-primary); font-size: 0.875rem;">
+                                <span>📊 ${template.flows.length} flujos incluidos</span>
+                            </div>
+                        </div>
+                    </div>
+                </summary>
+                <div style="padding: 0 1.5rem 1.5rem 1.5rem; border-top: 1px solid var(--color-border); margin-top: 1rem; padding-top: 1rem;">
+                    ${template.flows
+                      .map(
+                        (flow, index) => `
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: var(--color-background); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--color-text);">${flow.name}</div>
+                            <div style="display: grid; gap: 0.5rem; font-size: 0.875rem;">
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <span style="color: var(--color-text-secondary);">🎯 Objetivo:</span>
+                                    <span style="color: var(--color-text);">${flow.objective}</span>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <span style="color: var(--color-text-secondary);">⚡ Se activa:</span>
+                                    <span style="color: var(--color-text);">${flow.activatedBy}</span>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <span style="color: var(--color-text-secondary);">🧭 Acción:</span>
+                                    <span style="color: var(--color-text);">${flow.description}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                      )
+                      .join("")}
+                    <button class="btn-primary" onclick="applyTemplate('${template.id}')" style="width: 100%; margin-top: 1rem;">
+                        Usar esta plantilla
+                    </button>
                 </div>
-            </div>
+            </details>
         </div>
     `,
     )
@@ -1206,7 +1387,7 @@ function applyTemplate(templateId) {
                             ? `
                         <div class="form-group">
                             <label class="form-label">Página/Sección</label>
-                            <input type="text" class="form-input" data-field="page" placeholder="Ej: /registro" value="${flowData.page}" required>
+                            <input type="text" class="form-input" data-field="page" placeholder="Ej: /registro" value="${flowData.page || ""}" required>
                             <span class="helper-text">¿En qué página ocurre este flujo?</span>
                         </div>
                         `
@@ -1248,12 +1429,12 @@ function applyTemplate(templateId) {
                     </div>
                     <div class="form-group">
                         <label class="form-label">Condición especial o regla</label>
-                        <input type="text" class="form-input" data-field="conditions" placeholder="Ej: Solo si el usuario no tiene tag X" value="${flowData.conditions}">
+                        <input type="text" class="form-input" data-field="conditions" placeholder="Ej: Solo si el usuario no tiene tag X" value="${flowData.conditions || ""}">
                         <span class="helper-text">Opcional: ¿Hay alguna condición que deba cumplirse?</span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Conexiones con otras herramientas</label>
-                        <input type="text" class="form-input" data-field="dependencies" placeholder="Campos o integraciones requeridas" value="${flowData.dependencies}">
+                        <input type="text" class="form-input" data-field="dependencies" placeholder="Campos o integraciones requeridas" value="${flowData.dependencies || ""}">
                         <span class="helper-text">Ejemplo: ActiveCampaign, Google Sheets, API de WhatsApp</span>
                     </div>
                     <div class="form-group">
