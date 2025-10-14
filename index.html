@@ -1,272 +1,376 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Formulario de Automatizaciones</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="container">
-        <header class="header">
-            <div class="header-content">
-                <h1 class="logo">AutoFlow</h1>
-                <button class="btn-secondary" id="previewBtn">Vista Previa</button>
-            </div>
-        </header>
+      <header class="header">
+        <div class="header-content">
+          <h1 class="logo">AutoFlow</h1>
+          <button class="btn-secondary" id="previewBtn">Vista Previa</button>
+        </div>
+      </header>
 
-        <main class="main-content">
-            <div class="form-section">
-                <div class="section-header">
-                    <h2>Formulario de Automatizaciones</h2>
-                    <p class="subtitle">Describe tus necesidades de automatización y visualiza las relaciones entre flujos</p>
+      <main class="main-content">
+        <div class="form-section">
+          <div class="section-header">
+            <h2>Formulario de Automatizaciones</h2>
+            <p class="subtitle">
+              Describe tus necesidades de automatización y visualiza las
+              relaciones entre flujos
+            </p>
+          </div>
+
+          <form id="automationForm">
+            <!-- Pregunta inicial -->
+            <div class="form-group">
+              <label class="form-label">¿Para qué es la automatización?</label>
+              <div class="radio-group">
+                <label class="radio-card">
+                  <input
+                    type="radio"
+                    name="automationType"
+                    value="existing"
+                    required
+                  />
+                  <span class="radio-content">
+                    <span class="radio-title">Para una web existente</span>
+                    <span class="radio-description"
+                      >Automatizar procesos en un sitio ya en producción</span
+                    >
+                  </span>
+                </label>
+                <label class="radio-card">
+                  <input
+                    type="radio"
+                    name="automationType"
+                    value="development"
+                  />
+                  <span class="radio-content">
+                    <span class="radio-title">Para una web en desarrollo</span>
+                    <span class="radio-description"
+                      >Planificar automatizaciones para un proyecto nuevo</span
+                    >
+                  </span>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="automationType" value="custom" />
+                  <span class="radio-content">
+                    <span class="radio-title">Flujo personalizado</span>
+                    <span class="radio-description"
+                      >Crear un flujo de automatización específico</span
+                    >
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <button
+                type="button"
+                class="btn-secondary"
+                id="openTemplatesBtn"
+                style="width: 100%; justify-content: center"
+              >
+                📋 Usar Plantilla Predefinida
+              </button>
+            </div>
+
+            <!-- Campos globales -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="userName">Nombre</label>
+                <input
+                  type="text"
+                  id="userName"
+                  class="form-input"
+                  placeholder="Tu nombre"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="companyName">Empresa</label>
+                <input
+                  type="text"
+                  id="companyName"
+                  class="form-input"
+                  placeholder="Nombre de la empresa"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="implementationDate"
+                >Fecha estimada de implementación</label
+              >
+              <input
+                type="date"
+                id="implementationDate"
+                class="form-input"
+                required
+              />
+            </div>
+
+            <!-- Contenedor dinámico según tipo -->
+            <div id="dynamicContent"></div>
+
+            <!-- Sección de flujos -->
+            <div id="flowsSection" class="flows-section" style="display: none">
+              <div class="section-divider">
+                <h3>Flujos de Automatización</h3>
+                <div style="display: flex; gap: 0.5rem">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    id="openWizardBtn"
+                  >
+                    🧙 Asistente
+                  </button>
+                  <button type="button" class="btn-primary" id="addFlowBtn">
+                    + Agregar Flujo
+                  </button>
                 </div>
-
-                <form id="automationForm">
-                    <!-- Pregunta inicial -->
-                    <div class="form-group">
-                        <label class="form-label">¿Para qué es la automatización?</label>
-                        <div class="radio-group">
-                            <label class="radio-card">
-                                <input type="radio" name="automationType" value="existing" required>
-                                <span class="radio-content">
-                                    <span class="radio-title">Para una web existente</span>
-                                    <span class="radio-description">Automatizar procesos en un sitio ya en producción</span>
-                                </span>
-                            </label>
-                            <label class="radio-card">
-                                <input type="radio" name="automationType" value="development">
-                                <span class="radio-content">
-                                    <span class="radio-title">Para una web en desarrollo</span>
-                                    <span class="radio-description">Planificar automatizaciones para un proyecto nuevo</span>
-                                </span>
-                            </label>
-                            <label class="radio-card">
-                                <input type="radio" name="automationType" value="custom">
-                                <span class="radio-content">
-                                    <span class="radio-title">Flujo personalizado</span>
-                                    <span class="radio-description">Crear un flujo de automatización específico</span>
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="button" class="btn-secondary" id="openTemplatesBtn" style="width: 100%; justify-content: center;">
-                            📋 Usar Plantilla Predefinida
-                        </button>
-                    </div>
-
-                    <!-- Campos globales -->
-                    <div class="form-group">
-                        <label class="form-label" for="objective">Objetivo comercial o funcional</label>
-                        <input type="text" id="objective" class="form-input" placeholder="Ej: Lead generation, venta, notificación..." required>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="priority">Nivel de prioridad</label>
-                            <select id="priority" class="form-select" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="low">Baja</option>
-                                <option value="medium">Media</option>
-                                <option value="high">Alta</option>
-                                <option value="critical">Crítica</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="implementationDate">Fecha estimada de implementación</label>
-                        <input type="date" id="implementationDate" class="form-input" required>
-                    </div>
-
-                    <!-- Contenedor dinámico según tipo -->
-                    <div id="dynamicContent"></div>
-
-                    <!-- Sección de flujos -->
-                    <div id="flowsSection" class="flows-section" style="display: none;">
-                        <div class="section-divider">
-                            <h3>Flujos de Automatización</h3>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button type="button" class="btn-secondary" id="openWizardBtn">🧙 Asistente</button>
-                                <button type="button" class="btn-primary" id="addFlowBtn">+ Agregar Flujo</button>
-                            </div>
-                        </div>
-                        <div id="flowsList"></div>
-                    </div>
-
-                    <!-- Sección de relaciones -->
-                    <div id="relationsSection" class="relations-section" style="display: none;">
-                        <div class="section-divider">
-                            <h3>Relaciones entre Automatizaciones</h3>
-                            <button type="button" class="btn-primary" id="addRelationBtn">+ Agregar Relación</button>
-                        </div>
-                        <div id="relationsList"></div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn-secondary" id="viewMapBtn">Ver Mapa de Nodos</button>
-                        <button type="button" class="btn-secondary" id="exportCsvBtn">Exportar CSV</button>
-                        <button type="button" class="btn-secondary" id="sendToDbBtn">📤 Enviar a Base de Datos</button>
-                        <button type="submit" class="btn-primary">Generar JSON</button>
-                    </div>
-                </form>
+              </div>
+              <div id="flowsList"></div>
             </div>
-        </main>
+
+            <!-- Sección de relaciones -->
+            <div
+              id="relationsSection"
+              class="relations-section"
+              style="display: none"
+            >
+              <div class="section-divider">
+                <h3>Relaciones entre Automatizaciones</h3>
+                <button type="button" class="btn-primary" id="addRelationBtn">
+                  + Agregar Relación
+                </button>
+              </div>
+              <div id="relationsList"></div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" id="viewMapBtn">
+                Ver Mapa de Nodos
+              </button>
+              <button type="button" class="btn-secondary" id="exportCsvBtn">
+                Exportar CSV
+              </button>
+              <button type="button" class="btn-secondary" id="sendToDbBtn">
+                📤 Enviar a Base de Datos
+              </button>
+              <button type="submit" class="btn-primary">Generar JSON</button>
+            </div>
+          </form>
+        </div>
+      </main>
     </div>
 
     <!-- Modal de Vista Previa -->
     <div id="previewModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>Vista Previa - Datos del Formulario</h3>
-                <button class="modal-close" id="closePreview">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="preview-tabs">
-                    <button class="tab-btn active" data-tab="json">JSON</button>
-                    <button class="tab-btn" data-tab="visual">Vista Visual</button>
-                </div>
-                <div class="tab-content active" id="jsonTab">
-                    <pre id="jsonPreview" contenteditable="true"></pre>
-                </div>
-                <div class="tab-content" id="visualTab">
-                    <div id="visualPreview"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="copyJsonBtn">Copiar JSON</button>
-                <button class="btn-secondary" id="exportCsvModalBtn">Exportar CSV</button>
-                <button class="btn-primary" id="downloadJsonBtn">Descargar JSON</button>
-            </div>
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Vista Previa - Datos del Formulario</h3>
+          <button class="modal-close" id="closePreview">&times;</button>
         </div>
+        <div class="modal-body">
+          <div class="preview-tabs">
+            <button class="tab-btn active" data-tab="json">JSON</button>
+            <button class="tab-btn" data-tab="visual">Vista Visual</button>
+          </div>
+          <div class="tab-content active" id="jsonTab">
+            <pre id="jsonPreview" contenteditable="true"></pre>
+          </div>
+          <div class="tab-content" id="visualTab">
+            <div id="visualPreview"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="copyJsonBtn">Copiar JSON</button>
+          <button class="btn-secondary" id="exportCsvModalBtn">
+            Exportar CSV
+          </button>
+          <button class="btn-primary" id="downloadJsonBtn">
+            Descargar JSON
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal de Mapa de Nodos -->
     <div id="nodeMapModal" class="modal">
-        <div class="modal-content modal-fullscreen">
-            <div class="modal-header">
-                <h3>Mapa de Nodos - Visualización de Flujos</h3>
-                <button class="modal-close" id="closeNodeMap">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="node-map-controls">
-                    <div class="legend">
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: #8b5cf6;"></span>
-                            <span>Flujo Principal</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: #10b981;"></span>
-                            <span>Dependiente</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: #f59e0b;"></span>
-                            <span>Condicional</span>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn-secondary btn-icon" id="zoomInBtn" title="Acercar">+</button>
-                        <button class="btn-secondary btn-icon" id="zoomOutBtn" title="Alejar">−</button>
-                        <button class="btn-secondary" id="resetZoomBtn">Resetear Vista</button>
-                    </div>
-                </div>
-                <canvas id="nodeCanvas"></canvas>
-                <div id="nodeDetails" class="node-details" style="display: none;">
-                    <h4>Detalles del Flujo</h4>
-                    <div id="nodeDetailsContent"></div>
-                    <button class="btn-primary" id="closeNodeDetails">Cerrar</button>
-                </div>
-            </div>
+      <div class="modal-content modal-fullscreen">
+        <div class="modal-header">
+          <h3>Mapa de Nodos - Visualización de Flujos</h3>
+          <button class="modal-close" id="closeNodeMap">&times;</button>
         </div>
+        <div class="modal-body">
+          <div class="node-map-controls">
+            <div class="legend">
+              <div class="legend-item">
+                <span class="legend-color" style="background: #8b5cf6"></span>
+                <span>Flujo Principal</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background: #10b981"></span>
+                <span>Dependiente</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background: #f59e0b"></span>
+                <span>Condicional</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem">
+              <button
+                class="btn-secondary btn-icon"
+                id="zoomInBtn"
+                title="Acercar"
+              >
+                +
+              </button>
+              <button
+                class="btn-secondary btn-icon"
+                id="zoomOutBtn"
+                title="Alejar"
+              >
+                −
+              </button>
+              <button class="btn-secondary" id="resetZoomBtn">
+                Resetear Vista
+              </button>
+            </div>
+          </div>
+          <canvas id="nodeCanvas"></canvas>
+          <div id="nodeDetails" class="node-details" style="display: none">
+            <h4>Detalles del Flujo</h4>
+            <div id="nodeDetailsContent"></div>
+            <button class="btn-primary" id="closeNodeDetails">Cerrar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Modal de Simulación -->
     <div id="simulationModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>Simulación de Flujo</h3>
-                <button class="modal-close" id="closeSimulation">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="simulationSteps"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="restartSimulation">Reiniciar</button>
-                <button class="btn-primary" id="nextStep">Siguiente Paso</button>
-            </div>
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Simulación de Flujo</h3>
+          <button class="modal-close" id="closeSimulation">&times;</button>
         </div>
+        <div class="modal-body">
+          <div id="simulationSteps"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="restartSimulation">
+            Reiniciar
+          </button>
+          <button class="btn-primary" id="nextStep">Siguiente Paso</button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal de Plantillas Predefinidas -->
     <div id="templatesModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>Plantillas Predefinidas</h3>
-                <button class="modal-close" id="closeTemplates">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 1.5rem; color: var(--color-text-secondary);">
-                    Selecciona una plantilla común para comenzar rápidamente. Podrás editar todos los campos después.
-                </p>
-                <div id="templatesList" style="display: grid; gap: 1rem;"></div>
-            </div>
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Plantillas Predefinidas</h3>
+          <button class="modal-close" id="closeTemplates">&times;</button>
         </div>
+        <div class="modal-body">
+          <p style="margin-bottom: 1.5rem; color: var(--color-text-secondary)">
+            Selecciona una plantilla común para comenzar rápidamente. Podrás
+            editar todos los campos después.
+          </p>
+          <div id="templatesList" style="display: grid; gap: 1rem"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Modal de Asistente de Configuración -->
     <div id="wizardModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>Asistente de Configuración</h3>
-                <button class="modal-close" id="closeWizard">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="wizardSteps"></div>
-                <div id="wizardContent"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="wizardPrevBtn" style="display: none;">← Anterior</button>
-                <button class="btn-primary" id="wizardNextBtn">Siguiente →</button>
-            </div>
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Asistente de Configuración</h3>
+          <button class="modal-close" id="closeWizard">&times;</button>
         </div>
+        <div class="modal-body">
+          <div id="wizardSteps"></div>
+          <div id="wizardContent"></div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            id="wizardPrevBtn"
+            style="display: none"
+          >
+            ← Anterior
+          </button>
+          <button class="btn-primary" id="wizardNextBtn">Siguiente →</button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal de Enviar a Base de Datos -->
     <div id="dbModal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>Enviar a Base de Datos</h3>
-                <button class="modal-close" id="closeDb">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Endpoint de la API</label>
-                    <input type="url" id="dbEndpoint" class="form-input" placeholder="https://api.ejemplo.com/automatizaciones" required>
-                    <span class="helper-text">URL donde se enviarán los datos</span>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">API Key (opcional)</label>
-                    <input type="text" id="dbApiKey" class="form-input" placeholder="tu-api-key">
-                    <span class="helper-text">Token de autenticación si es requerido</span>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Método HTTP</label>
-                    <select id="dbMethod" class="form-select">
-                        <option value="POST">POST</option>
-                        <option value="PUT">PUT</option>
-                    </select>
-                </div>
-                <div id="dbResponse" style="margin-top: 1rem; padding: 1rem; background: var(--color-surface-elevated); border-radius: var(--radius-md); display: none;"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="cancelDbSend">Cancelar</button>
-                <button class="btn-primary" id="confirmDbSend">Enviar Datos</button>
-            </div>
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Enviar a Base de Datos</h3>
+          <button class="modal-close" id="closeDb">&times;</button>
         </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Endpoint de la API</label>
+            <input
+              type="url"
+              id="dbEndpoint"
+              class="form-input"
+              placeholder="https://api.ejemplo.com/automatizaciones"
+              required
+            />
+            <span class="helper-text">URL donde se enviarán los datos</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">API Key (opcional)</label>
+            <input
+              type="text"
+              id="dbApiKey"
+              class="form-input"
+              placeholder="tu-api-key"
+            />
+            <span class="helper-text"
+              >Token de autenticación si es requerido</span
+            >
+          </div>
+          <div class="form-group">
+            <label class="form-label">Método HTTP</label>
+            <select id="dbMethod" class="form-select">
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+            </select>
+          </div>
+          <div
+            id="dbResponse"
+            style="
+              margin-top: 1rem;
+              padding: 1rem;
+              background: var(--color-surface-elevated);
+              border-radius: var(--radius-md);
+              display: none;
+            "
+          ></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="cancelDbSend">Cancelar</button>
+          <button class="btn-primary" id="confirmDbSend">Enviar Datos</button>
+        </div>
+      </div>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
